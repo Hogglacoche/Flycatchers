@@ -5,6 +5,7 @@ library(stringr)
 library(corrplot)
 library(tidyr)
 library(gtools)
+library(ggplot2)
 
 size<-read.table("chr_category.txt", header = T)
 size<-size %>% rename(chr = chromosome)
@@ -18,42 +19,106 @@ table_hypoleuca$gene <- sapply(str_split(table_hypoleuca$gene, "_"), "[[", 1)
 table_parva$gene <- sapply(str_split(table_parva$gene, "_"), "[[", 1)
 table_taiga$gene <- sapply(str_split(table_taiga$gene, "_"), "[[", 1)
 
-pi_table_albicollis<- table_albicollis[, c('gene','chr', 'pn_ps_gc', 'pn_ps_all')]
+pi_table_albicollis<- table_albicollis[, c('chr', 'het_zero_gc', 'len_zero_gc', 'het_four_gc', 'len_four_gc', 'het_zero_all','len_zero_all','het_four_all','len_four_all')]
+pi_table_albicollis[, -1] <- sapply(pi_table_albicollis[, -1], as.numeric)
 pi_table_albicollis<-na.omit(pi_table_albicollis)
-pi_table_hypoleuca<- table_hypoleuca[, c('gene','chr','pn_ps_gc', 'pn_ps_all')]
-pi_table_hypoleuca<-na.omit(pi_table_hypoleuca)
-pi_table_taiga<- table_taiga[, c('gene','chr', 'pn_ps_gc', 'pn_ps_all')]
-pi_table_taiga<-na.omit(pi_table_taiga)
-pi_table_parva<- table_parva[, c('gene','chr','pn_ps_gc', 'pn_ps_all')]
-pi_table_parva<- na.omit(pi_table_parva)
 
-pi_table<-merge(pi_table_albicollis, pi_table_hypoleuca, by = "gene", all = T)
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.x$", "_coll", .x), ends_with(".x"))
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.y$", "_pied", .x), ends_with(".y"))
-pi_table<-merge(pi_table, pi_table_parva, by = "gene", all = T)
-pi_table<-merge(pi_table, pi_table_taiga, by = "gene", all = T)
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.x$", "_parva", .x), ends_with(".x"))
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.y$", "_taiga", .x), ends_with(".y"))
-pi_table<-subset(pi_table, select= -chr_pied)
-pi_table<-subset(pi_table, select= -chr_taiga)
-pi_table<-subset(pi_table, select= -chr_parva)
-pi_table<-pi_table %>% rename(chr = chr_coll)
-pi_table[pi_table == "NULL"] <- NA
-pi_table<-subset(pi_table, select= -gene)
+pi_table_taiga<- table_taiga[, c('chr', 'het_zero_gc', 'len_zero_gc', 'het_four_gc', 'len_four_gc', 'het_zero_all','len_zero_all','het_four_all','len_four_all')]
+pi_table_taiga[, -1] <- sapply(pi_table_taiga[, -1], as.numeric)
+pi_table_taiga<-na.omit(pi_table_taiga)
+
+pi_table_hypoleuca<- table_hypoleuca[, c('chr', 'het_zero_gc', 'len_zero_gc', 'het_four_gc', 'len_four_gc', 'het_zero_all','len_zero_all','het_four_all','len_four_all')]
+pi_table_hypoleuca[, -1] <- sapply(pi_table_hypoleuca[, -1], as.numeric)
+pi_table_hypoleuca<-na.omit(pi_table_hypoleuca)
+
+pi_table_parva<- table_parva[, c('chr', 'het_zero_gc', 'len_zero_gc', 'het_four_gc', 'len_four_gc', 'het_zero_all','len_zero_all','het_four_all','len_four_all')]
+pi_table_parva[, -1] <- sapply(pi_table_parva[, -1], as.numeric)
+pi_table_parva<-na.omit(pi_table_parva)
+
+ calculer_pn_ps <- function(het_zero, len_zero, het_four, len_four) {
+  return((het_zero / len_zero) / (het_four / len_four))
+}
+
+ calculer_pn <- function(het_zero, len_zero) {
+   return(het_zero / len_zero)
+ }
+ 
+ calculer_ps <- function(het_four, len_four) {
+   return(het_four / len_four)
+ }
+ 
+## albicollis_pn_ps_gc
+albicollis_pn_ps_gc <- aggregate(cbind(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc) ~ chr, pi_table_albicollis, mean)
+albicollis_pn_ps_gc$albicollis_pn_gc <- with(albicollis_pn_ps_gc, calculer_pn(het_zero_gc, len_zero_gc))
+albicollis_pn_ps_gc$albicollis_ps_gc <- with(albicollis_pn_ps_gc, calculer_ps(het_four_gc, len_four_gc))
+albicollis_pn_ps_gc$albicollis_pn_ps_gc <- with(albicollis_pn_ps_gc, calculer_pn_ps(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc))
+
+## albicollis_pn_ps_all
+albicollis_pn_ps_all <- aggregate(cbind(het_zero_all, len_zero_all, het_four_all, len_four_all) ~ chr, pi_table_albicollis, mean)
+albicollis_pn_ps_all$albicollis_pn_all <- with(albicollis_pn_ps_all, calculer_pn(het_zero_all, len_zero_all))
+albicollis_pn_ps_all$albicollis_ps_all <- with(albicollis_pn_ps_all, calculer_ps(het_four_all, len_four_all))
+albicollis_pn_ps_all$albicollis_pn_ps_all <- with(albicollis_pn_ps_all, calculer_pn_ps(het_zero_all, len_zero_all, het_four_all, len_four_all))
+
+## taiga_pn_ps_gc
+taiga_pn_ps_gc <- aggregate(cbind(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc) ~ chr, pi_table_taiga, mean)
+taiga_pn_ps_gc$taiga_pn_gc <- with(taiga_pn_ps_gc, calculer_pn(het_zero_gc, len_zero_gc))
+taiga_pn_ps_gc$taiga_ps_gc <- with(taiga_pn_ps_gc, calculer_ps(het_four_gc, len_four_gc))
+taiga_pn_ps_gc$taiga_pn_ps_gc <- with(taiga_pn_ps_gc, calculer_pn_ps(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc))
+
+## taiga_pn_ps_all
+taiga_pn_ps_all <- aggregate(cbind(het_zero_all, len_zero_all, het_four_all, len_four_all) ~ chr, pi_table_taiga, mean)
+taiga_pn_ps_all$taiga_pn_all <- with(taiga_pn_ps_all, calculer_pn(het_zero_all, len_zero_all))
+taiga_pn_ps_all$taiga_ps_all <- with(taiga_pn_ps_all, calculer_ps(het_four_all, len_four_all))
+taiga_pn_ps_all$taiga_pn_ps_all <- with(taiga_pn_ps_all, calculer_pn_ps(het_zero_all, len_zero_all, het_four_all, len_four_all))
+
+## hypoleuca_pn_ps_gc
+hypoleuca_pn_ps_gc <- aggregate(cbind(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc) ~ chr, pi_table_hypoleuca, mean)
+hypoleuca_pn_ps_gc$hypoleuca_pn_gc <- with(hypoleuca_pn_ps_gc, calculer_pn(het_zero_gc, len_zero_gc))
+hypoleuca_pn_ps_gc$hypoleuca_ps_gc <- with(hypoleuca_pn_ps_gc, calculer_ps(het_four_gc, len_four_gc))
+hypoleuca_pn_ps_gc$hypoleuca_pn_ps_gc <- with(hypoleuca_pn_ps_gc, calculer_pn_ps(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc))
+
+## hypoleuca_pn_ps_all
+hypoleuca_pn_ps_all <- aggregate(cbind(het_zero_all, len_zero_all, het_four_all, len_four_all) ~ chr, pi_table_hypoleuca, mean)
+hypoleuca_pn_ps_all$hypoleuca_pn_all <- with(hypoleuca_pn_ps_all, calculer_pn(het_zero_all, len_zero_all))
+hypoleuca_pn_ps_all$hypoleuca_ps_all <- with(hypoleuca_pn_ps_all, calculer_ps(het_four_all, len_four_all))
+hypoleuca_pn_ps_all$hypoleuca_pn_ps_all <- with(hypoleuca_pn_ps_all, calculer_pn_ps(het_zero_all, len_zero_all, het_four_all, len_four_all))
+
+## parva_pn_ps_gc
+parva_pn_ps_gc <- aggregate(cbind(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc) ~ chr, pi_table_parva, mean)
+parva_pn_ps_gc$parva_pn_gc <- with(parva_pn_ps_gc, calculer_pn(het_zero_gc, len_zero_gc))
+parva_pn_ps_gc$parva_ps_gc <- with(parva_pn_ps_gc, calculer_ps(het_four_gc, len_four_gc))
+parva_pn_ps_gc$parva_pn_ps_gc <- with(parva_pn_ps_gc, calculer_pn_ps(het_zero_gc, len_zero_gc, het_four_gc, len_four_gc))
+
+## hypoleuca_pn_ps_all
+parva_pn_ps_all <- aggregate(cbind(het_zero_all, len_zero_all, het_four_all, len_four_all) ~ chr, pi_table_parva, mean)
+parva_pn_ps_all$parva_pn_all <- with(parva_pn_ps_all, calculer_pn(het_zero_all, len_zero_all))
+parva_pn_ps_all$parva_ps_all <- with(parva_pn_ps_all, calculer_ps(het_four_all, len_four_all))
+parva_pn_ps_all$parva_pn_ps_all <- with(parva_pn_ps_all, calculer_pn_ps(het_zero_all, len_zero_all, het_four_all, len_four_all))
+
+##merge
+pi_table <- albicollis_pn_ps_gc %>%
+  left_join(hypoleuca_pn_ps_gc, by = "chr") %>%
+  left_join(taiga_pn_ps_gc, by = "chr") %>%
+  left_join(parva_pn_ps_gc, by = "chr") %>%
+  left_join(albicollis_pn_ps_all, by = "chr") %>%
+  left_join(hypoleuca_pn_ps_all, by = "chr") %>%
+  left_join(taiga_pn_ps_all, by = "chr") %>%
+  left_join(parva_pn_ps_all, by = "chr")
 
 ##############################################################################
 # correlation matrix gene 
+
+pi_table<- pi_table[, c('chr','albicollis_pn_ps_gc', 'hypoleuca_pn_ps_gc', 'taiga_pn_ps_gc', 'parva_pn_ps_gc', 'albicollis_pn_ps_all', 'hypoleuca_pn_ps_all','taiga_pn_ps_all','parva_pn_ps_all')]
+
+pi_table <- pi_table %>% filter(chr != "Chr25")
+pi_table <- pi_table %>% filter(chr != "ChrLGE22")
 
 pi_table<-subset(pi_table, select= -chr)
 pi_table<- sapply(pi_table, as.numeric)
 
 is.data.frame(pi_table) 
 is.numeric(pi_table)                           
-correlation_matrix<-cor(pi_table, use = "pairwise.complete.obs")
+correlation_matrix<-cor(pi_table, method = "spearman")
 correlation_matrix
 
 corrplot(correlation_matrix, method="circle", type="upper", tl.col="black", tl.srt=45)
@@ -66,8 +131,8 @@ heatmap(x = correlation_matrix, col = col, symm = TRUE)
 
 #distribution pN/ps
 
-pi_table[, -1] <- sapply(pi_table[, -1], as.numeric)
-pi_table <- aggregate(cbind(pn_ps_gc_coll, pn_ps_all_coll, pn_ps_gc_pied, pn_ps_all_pied, pn_ps_gc_parva, pn_ps_all_parva, pn_ps_gc_taiga, pn_ps_all_taiga) ~ chr, pi_table, mean)
+pi_table<- pi_table[, c('chr','albicollis_pn_ps_gc', 'hypoleuca_pn_ps_gc', 'taiga_pn_ps_gc', 'parva_pn_ps_gc', 'albicollis_pn_ps_all', 'hypoleuca_pn_ps_all','taiga_pn_ps_all','parva_pn_ps_all')]
+
 pi_table$chr <- factor(pi_table$chr, levels = mixedsort(pi_table$chr))
 pi_table<-merge(pi_table, size, by ="chr", all =T)
 pi_table <- pi_table %>% filter(chr != "Chr24")
@@ -81,9 +146,8 @@ pi_table <- pi_table %>% filter(chr != "ChrFal36")
 pi_table <- pi_table %>% filter(chr != "Chr27")
 pi_table <- pi_table %>% filter(chr != "Chr13")
 pi_table <- pi_table %>% filter(chr != "Chr28")
+pi_table <- pi_table %>% filter(chr != "ChrZ")
 
-chromosome_order <- order(pi_table$length)
-pi_table <- pi_table[chromosome_order, ]
 
 palette_couleurs <- c("pn/ps GC coll" = "steelblue1", 
                       "pn/ps GC pied" = "darkorchid",
@@ -93,20 +157,35 @@ palette_couleurs <- c("pn/ps GC coll" = "steelblue1",
                       "pn/ps ALL pied" = "darkorchid",
                       "pn/ps ALL parva" = "tomato",
                       "pn/ps ALL taiga" = "gold")
+
 ggplot() +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_gc_coll, color = "pn/ps GC coll"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_gc_pied, color = "pn/ps GC pied"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_gc_parva, color = "pn/ps GC parva"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_gc_taiga, color = "pn/ps GC taiga"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_all_coll, color = "pn/ps ALL coll"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_all_pied, color = "pn/ps ALL pied"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_all_parva, color = "pn/ps ALL parva"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_ps_all_taiga, color = "pn/ps ALL taiga"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = albicollis_pn_ps_gc, color = "pn/ps GC coll"), 
+             shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = hypoleuca_pn_ps_gc, color = "pn/ps GC pied"), 
+             shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = taiga_pn_ps_gc, color = "pn/ps GC taiga"), 
+             shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = parva_pn_ps_gc, color = "pn/ps GC parva"), 
+             shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = albicollis_pn_ps_all, color = "pn/ps ALL coll"), 
+             shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = hypoleuca_pn_ps_all, color = "pn/ps ALL pied"), 
+             shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = taiga_pn_ps_all, color = "pn/ps ALL taiga"), 
+             shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = factor(chr, levels = unique(pi_table$chr[order(pi_table$length)])), 
+                                  y = parva_pn_ps_all, color = "pn/ps ALL parva"), 
+             shape = 17, size = 2) +
   scale_color_manual(values = palette_couleurs) +
   labs(x = "chromosome", y = "pn/ps", color = "Conditions") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # Orientation verticale
-
-
 #################################################################################
 
 # albicollis GC pn~pS
@@ -460,39 +539,6 @@ ggplot(resultats_df, aes(x = Chromosome, y = Correlation)) +
        y = "Correlation") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) 
 
-################################################################################
-
-# Distribution pn/ps
-
-pi_table_albicollis[pi_table_albicollis == "NULL"] <- NA
-
-pi_table_albicollis$pn_ps_all<- sapply(pi_table_albicollis$pn_ps_all, as.numeric)
-pi_table_albicollis$pn_ps_all<-as.numeric(pi_table_albicollis$pn_ps_all)
-is.numeric(pi_table_albicollis$pn_ps_all)
-count_non_zero_all <- sum(pi_table_albicollis$pn_ps_all != 0)
-
-pi_table_albicollis$pn_ps_gc<- sapply(pi_table_albicollis$pn_ps_gc, as.numeric)
-pi_table_albicollis$pn_ps_gc<-as.numeric(pi_table_albicollis$pn_ps_gc)
-is.numeric(pi_table_albicollis$pn_ps_gc)
-count_non_zero_gc <- sum(pi_table_albicollis$pn_ps_gc != 0)
-
-pi_table_hypoleuca[pi_table_hypoleuca == "NULL"] <- NA
-
-pi_table_hypoleuca$pn_ps_all<- sapply(pi_table_hypoleuca$pn_ps_all, as.numeric)
-pi_table_hypoleuca$pn_ps_all<-as.numeric(pi_table_hypoleuca$pn_ps_all)
-is.numeric(pi_table_hypoleuca$pn_ps_all)
-count_non_zero_all <- sum(pi_table_hypoleuca$pn_ps_all != 0)
-
-pi_table_hypoleuca$pn_ps_gc<- sapply(pi_table_hypoleuca$pn_ps_gc, as.numeric)
-pi_table_hypoleuca$pn_ps_gc<-as.numeric(pi_table_hypoleuca$pn_ps_gc)
-is.numeric(pi_table_hypoleuca$pn_ps_gc)
-count_non_zero_gc <- sum(pi_table_hypoleuca$pn_ps_gc != 0)
-
-pi_table_albicollis$chr <- factor(pi_table_albicollis$chr, levels = mixedsort(unique(pi_table_albicollis$chr)))
-
-ggplot(pi_table_albicollis, aes(x = factor(chr), y = pn_ps_gc)) +
-  geom_point() +  # Ajouter des points
-  labs(x = "Chromosome", y = "pn_ps_gc", title = "Valeurs de pn_ps_gc par chromosome")
 
 #########################################################################################
 
@@ -577,7 +623,7 @@ pi_table_cat <- pi_table_cat %>% filter(chr != "Chr27")
 pi_table_cat <- pi_table_cat %>% filter(chr != "Chr13")
 pi_table_cat <- pi_table_cat %>% filter(chr != "Chr28")
 
-pi_table_cat_mean <- aggregate(cbind(pn_ps_gc_coll, pn_ps_all_coll, pn_ps_gc_pied, pn_ps_all_pied, pn_ps_gc_taiga, pn_ps_all_taiga, pn_ps_gc_parva, pn_ps_all_parva) ~ category, pi_table_cat, mean)
+pi_table_cat_mean <- aggregate(cbind(albicollis_pn_ps_gc, albicollis_pn_ps_all, hypoleuca_pn_ps_gc, hypoleuca_pn_ps_all, taiga_pn_ps_gc, taiga_pn_ps_all, parva_pn_ps_gc, parva_pn_ps_all) ~ category, pi_table_cat, mean)
 
 pi_table_cat_mean$category <- factor(pi_table_cat_mean$category, levels = c("Macro", "Intermediate", "Micro"))
 
@@ -590,95 +636,17 @@ palette_couleurs <- c("pn/ps GC coll" = "steelblue1",
                       "pn/ps ALL parva" = "tomato",
                       "pn/ps ALL taiga" = "gold")
 ggplot() +
-  geom_point(data = pi_table_cat_mean, aes(x = category, y = pn_ps_gc_coll, color = "pn/ps GC coll"), shape = 16, size = 2) +
-  geom_point(data = pi_table_cat_mean, aes(x = category, y = pn_ps_gc_pied, color = "pn/ps GC pied"), shape = 16, size = 2) +
-  geom_point(data = pi_table_cat_mean, aes(x = category, y = pn_ps_gc_parva, color = "pn/ps GC parva"), shape = 16, size = 2) +
-  geom_point(data = pi_table_cat_mean, aes(x = category, y = pn_ps_gc_taiga, color = "pn/ps GC taiga"), shape = 16, size = 2) +
+
+  geom_point(data = pi_table_cat_mean, aes(x = category, y = albicollis_pn_ps_all, color = "pn/ps ALL coll"), shape = 16, size = 2) +
+  geom_point(data = pi_table_cat_mean, aes(x = category, y = hypoleuca_pn_ps_all, color = "pn/ps ALL pied"), shape = 16, size = 2) +
+  geom_point(data = pi_table_cat_mean, aes(x = category, y = parva_pn_ps_all, color = "pn/ps ALL parva"), shape = 16, size = 2) +
+  geom_point(data = pi_table_cat_mean, aes(x = category, y = taiga_pn_ps_all, color = "pn/ps ALL taiga"), shape = 16, size = 2) +
+  
   scale_color_manual(values = palette_couleurs) +
   labs(x = "chromosome", y = "pn/ps", color = "Conditions") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # Orientation verticale
 
-
 ###################################################################################################
-
-# distribution piS
-
-setwd("/home/amaniouloux/Documents/data/dataframe//")
-output_directory <- "/home/amaniouloux/Documents/data/Rstudio/résultats/"
-
-size<-read.table("chr_category.txt", header = T)
-size<-size %>% rename(chr = chromosome)
-
-table_albicollis <- read.table("table_albicollis.txt", header = T) 
-table_hypoleuca <- read.table("table_hypoleuca.txt", header = T)
-table_taiga <- read.table("table_taiga.txt", header = T)
-table_parva <-read.table("table_parva.txt", header = T)
-table_albicollis$gene <- sapply(str_split(table_albicollis$gene, "_"), "[[", 1)
-table_hypoleuca$gene <- sapply(str_split(table_hypoleuca$gene, "_"), "[[", 1)
-table_parva$gene <- sapply(str_split(table_parva$gene, "_"), "[[", 1)
-table_taiga$gene <- sapply(str_split(table_taiga$gene, "_"), "[[", 1)
-
-pi_table_albicollis<- table_albicollis[, c('gene','chr', 'ps_gc', 'ps_all')]
-pi_table_albicollis<-na.omit(pi_table_albicollis)
-pi_table_hypoleuca<- table_hypoleuca[, c('gene','chr','ps_gc', 'ps_all')]
-pi_table_hypoleuca<-na.omit(pi_table_hypoleuca)
-pi_table_taiga<- table_taiga[, c('gene','chr', 'ps_gc', 'ps_all')]
-pi_table_taiga<-na.omit(pi_table_taiga)
-pi_table_parva<- table_parva[, c('gene','chr','ps_gc', 'ps_all')]
-pi_table_parva<- na.omit(pi_table_parva)
-
-pi_table<-merge(pi_table_albicollis, pi_table_hypoleuca, by = "gene", all = T)
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.x$", "_coll", .x), ends_with(".x"))
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.y$", "_pied", .x), ends_with(".y"))
-pi_table<-merge(pi_table, pi_table_parva, by = "gene", all = T)
-pi_table<-merge(pi_table, pi_table_taiga, by = "gene", all = T)
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.x$", "_parva", .x), ends_with(".x"))
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.y$", "_taiga", .x), ends_with(".y"))
-pi_table<-subset(pi_table, select= -chr_pied)
-pi_table<-subset(pi_table, select= -chr_taiga)
-pi_table<-subset(pi_table, select= -chr_parva)
-pi_table<-pi_table %>% rename(chr = chr_coll)
-pi_table[pi_table == "NULL"] <- NA
-pi_table<-subset(pi_table, select= -gene)
-
-
-pi_table[, -1] <- sapply(pi_table[, -1], as.numeric)
-pi_table <- aggregate(cbind(ps_gc_coll, ps_all_coll, ps_gc_pied, ps_all_pied, ps_gc_parva, ps_all_parva, ps_gc_taiga, ps_all_taiga) ~ chr, pi_table, mean)
-pi_table$chr <- factor(pi_table$chr, levels = mixedsort(pi_table$chr))
-pi_table<-merge(pi_table, size, by ="chr", all =T)
-pi_table <- pi_table %>% filter(chr != "ChrFal34")
-pi_table <- pi_table %>% filter(chr != "ChrFal36")
-
-chromosome_order <- order(pi_table$length)
-
-pi_table <- pi_table[chromosome_order, ]
-
-palette_couleurs <- c("ps GC coll" = "steelblue1", 
-                      "ps GC pied" = "darkorchid",
-                      "ps GC parva" = "tomato",
-                      "ps GC taiga" = "gold",
-                      "ps ALL coll" = "steelblue1",
-                      "ps ALL pied" = "darkorchid",
-                      "ps ALL parva" = "tomato",
-                      "ps ALL taiga" = "gold")
-ggplot() +
-  geom_point(data = pi_table, aes(x = chr, y = ps_gc_coll, color = "ps GC coll"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_gc_pied, color = "ps GC pied"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_gc_parva, color = "ps GC parva"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_gc_taiga, color = "ps GC taiga"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_all_coll, color = "ps ALL coll"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_all_pied, color = "ps ALL pied"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_all_parva, color = "ps ALL parva"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = ps_all_taiga, color = "ps ALL taiga"), shape = 17, size = 2) +
-  scale_color_manual(values = palette_couleurs) +
-  labs(x = "chromosome", y = "ps", color = "Conditions") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  
-
-###########################################################################################################
 
 # distribution piN
 
@@ -688,53 +656,13 @@ output_directory <- "/home/amaniouloux/Documents/data/Rstudio/résultats/"
 size<-read.table("chr_category.txt", header = T)
 size<-size %>% rename(chr = chromosome)
 
-table_albicollis <- read.table("table_albicollis.txt", header = T) 
-table_hypoleuca <- read.table("table_hypoleuca.txt", header = T)
-table_taiga <- read.table("table_taiga.txt", header = T)
-table_parva <-read.table("table_parva.txt", header = T)
-table_albicollis$gene <- sapply(str_split(table_albicollis$gene, "_"), "[[", 1)
-table_hypoleuca$gene <- sapply(str_split(table_hypoleuca$gene, "_"), "[[", 1)
-table_parva$gene <- sapply(str_split(table_parva$gene, "_"), "[[", 1)
-table_taiga$gene <- sapply(str_split(table_taiga$gene, "_"), "[[", 1)
+pi_table<- pi_table[, c('chr','albicollis_pn_gc', 'hypoleuca_pn_gc', 'taiga_pn_gc', 'parva_pn_gc', 'albicollis_pn_all', 'hypoleuca_pn_all','taiga_pn_all','parva_pn_all')]
 
-pi_table_albicollis<- table_albicollis[, c('gene','chr', 'pn_gc', 'pn_all')]
-pi_table_albicollis<-na.omit(pi_table_albicollis)
-pi_table_hypoleuca<- table_hypoleuca[, c('gene','chr','pn_gc', 'pn_all')]
-pi_table_hypoleuca<-na.omit(pi_table_hypoleuca)
-pi_table_taiga<- table_taiga[, c('gene','chr', 'pn_gc', 'pn_all')]
-pi_table_taiga<-na.omit(pi_table_taiga)
-pi_table_parva<- table_parva[, c('gene','chr','pn_gc', 'pn_all')]
-pi_table_parva<- na.omit(pi_table_parva)
-
-pi_table<-merge(pi_table_albicollis, pi_table_hypoleuca, by = "gene", all = T)
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.x$", "_coll", .x), ends_with(".x"))
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.y$", "_pied", .x), ends_with(".y"))
-pi_table<-merge(pi_table, pi_table_parva, by = "gene", all = T)
-pi_table<-merge(pi_table, pi_table_taiga, by = "gene", all = T)
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.x$", "_parva", .x), ends_with(".x"))
-pi_table <- pi_table %>%
-  rename_with(~ gsub("\\.y$", "_taiga", .x), ends_with(".y"))
-pi_table<-subset(pi_table, select= -chr_pied)
-pi_table<-subset(pi_table, select= -chr_taiga)
-pi_table<-subset(pi_table, select= -chr_parva)
-pi_table<-pi_table %>% rename(chr = chr_coll)
-pi_table[pi_table == "NULL"] <- NA
-pi_table<-subset(pi_table, select= -gene)
-
-
-pi_table[, -1] <- sapply(pi_table[, -1], as.numeric)
-pi_table <- aggregate(cbind(pn_gc_coll, pn_all_coll, pn_gc_pied, pn_all_pied, pn_gc_parva, pn_all_parva, pn_gc_taiga, pn_all_taiga) ~ chr, pi_table, mean)
 pi_table$chr <- factor(pi_table$chr, levels = mixedsort(pi_table$chr))
 pi_table<-merge(pi_table, size, by ="chr", all =T)
 pi_table <- pi_table %>% filter(chr != "ChrFal34")
 pi_table <- pi_table %>% filter(chr != "ChrFal36")
-
-chromosome_order <- order(pi_table$length)
-
-pi_table <- pi_table[chromosome_order, ]
+pi_table <- pi_table %>% filter(chr != "ChrZ")
 
 palette_couleurs <- c("pn GC coll" = "steelblue1", 
                       "pn GC pied" = "darkorchid",
@@ -745,16 +673,55 @@ palette_couleurs <- c("pn GC coll" = "steelblue1",
                       "pn ALL parva" = "tomato",
                       "pn ALL taiga" = "gold")
 ggplot() +
-  geom_point(data = pi_table, aes(x = chr, y = pn_gc_coll, color = "pn GC coll"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_gc_pied, color = "pn GC pied"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_gc_parva, color = "pn GC parva"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_gc_taiga, color = "pn GC taiga"), shape = 16, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_all_coll, color = "pn ALL coll"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_all_pied, color = "pn ALL pied"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_all_parva, color = "pn ALL parva"), shape = 17, size = 2) +
-  geom_point(data = pi_table, aes(x = chr, y = pn_all_taiga, color = "pn ALL taiga"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = albicollis_pn_gc, color = "pn GC coll"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = hypoleuca_pn_gc, color = "pn GC pied"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = parva_pn_gc, color = "pn GC parva"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = taiga_pn_gc, color = "pn GC taiga"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = albicollis_pn_all, color = "pn ALL coll"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = hypoleuca_pn_all, color = "pn ALL pied"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = parva_pn_all, color = "pn ALL parva"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = taiga_pn_all, color = "pn ALL taiga"), shape = 17, size = 2) +
   scale_color_manual(values = palette_couleurs) +
-  labs(x = "chromosome", y = "pn", color = "Conditions") +
+  labs(x = "chromosome", y = "ps", color = "Conditions") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  
+
+###########################################################################################################
+
+# distribution piN
+
+ssetwd("/home/amaniouloux/Documents/data/dataframe//")
+output_directory <- "/home/amaniouloux/Documents/data/Rstudio/résultats/"
+
+size<-read.table("chr_category.txt", header = T)
+size<-size %>% rename(chr = chromosome)
+
+pi_table<- pi_table[, c('chr','albicollis_ps_gc', 'hypoleuca_ps_gc', 'taiga_ps_gc', 'parva_ps_gc', 'albicollis_ps_all', 'hypoleuca_ps_all','taiga_ps_all','parva_ps_all')]
+
+pi_table$chr <- factor(pi_table$chr, levels = mixedsort(pi_table$chr))
+pi_table<-merge(pi_table, size, by ="chr", all =T)
+pi_table <- pi_table %>% filter(chr != "ChrFal34")
+pi_table <- pi_table %>% filter(chr != "ChrFal36")
+pi_table <- pi_table %>% filter(chr != "ChrZ")
+
+palette_couleurs <- c("ps GC coll" = "steelblue1", 
+                      "ps GC pied" = "darkorchid",
+                      "ps GC parva" = "tomato",
+                      "ps GC taiga" = "gold",
+                      "ps ALL coll" = "steelblue1",
+                      "ps ALL pied" = "darkorchid",
+                      "ps ALL parva" = "tomato",
+                      "ps ALL taiga" = "gold")
+ggplot() +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = albicollis_ps_gc, color = "ps GC coll"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = hypoleuca_ps_gc, color = "ps GC pied"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = parva_ps_gc, color = "ps GC parva"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = taiga_ps_gc, color = "ps GC taiga"), shape = 16, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = albicollis_ps_all, color = "ps ALL coll"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = hypoleuca_ps_all, color = "ps ALL pied"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = parva_ps_all, color = "ps ALL parva"), shape = 17, size = 2) +
+  geom_point(data = pi_table, aes(x = reorder(chr, length), y = taiga_ps_all, color = "ps ALL taiga"), shape = 17, size = 2) +
+  scale_color_manual(values = palette_couleurs) +
+  labs(x = "chromosome", y = "ps", color = "Conditions") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  
 
 #################

@@ -140,7 +140,7 @@ tau_results_coll_chr$chr <- factor(tau_results_coll_chr$chr, levels = mixedsort(
  ggplot(tau_results_coll_chr, aes(x = chr, y = Tau)) +
   geom_point() +
   labs(x = "Chromosome", y = "Mean Tau Index", title = " Distribution Mean Tau Index by Chromosome") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Tourner les étiquettes de l'axe x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))                           
 
 size<-size %>% rename( chr = chromosome)
 mean_by_chromosome_coll<-merge(mean_by_chromosome_coll, size, by = "chr", all = T)
@@ -153,7 +153,7 @@ mean_by_chromosome_coll$chr <- factor(mean_by_chromosome_coll$chr, levels = mean
 plot <- ggplot(mean_by_chromosome_coll, aes(x = chr, y = Tau)) +
   geom_point() +
   labs(x = "Chromosome", y = "Mean Tau Index", title = "Mean Tau Index by Chromosome") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Tourner les étiquettes de l'axe x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))   
 print(plot)
 
 
@@ -195,7 +195,7 @@ tau_results_pied_chr$chr <- factor(tau_results_pied_chr$chr, levels = mixedsort(
 plot <- ggplot(tau_results_pied_chr, aes(x = chr, y = Tau)) +
   geom_point() +
   labs(x = "Chromosome", y = "Mean Tau Index", title = " Distribution Mean Tau Index by Chromosome") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Tourner les étiquettes de l'axe x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))   
 print(plot)
 
 mean_by_chromosome_pied<-merge(mean_by_chromosome_pied, size, by = "chr", all = T)
@@ -207,7 +207,7 @@ mean_by_chromosome_pied$chr <- factor(mean_by_chromosome_pied$chr, levels = mean
 plot <- ggplot(mean_by_chromosome_pied, aes(x = chr, y = Tau)) +
   geom_point() +
   labs(x = "Chromosome", y = "Mean Tau Index", title = "Mean Tau Index by Chromosome") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Tourner les étiquettes de l'axe x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 print(plot)
 
 #hybrid chromosome
@@ -248,7 +248,7 @@ tau_results_hybrid_chr$chr <- factor(tau_results_hybrid_chr$chr, levels = mixeds
 plot <- ggplot(tau_results_hybrid_chr, aes(x = chr, y = Tau)) +
   geom_point() +
   labs(x = "Chromosome", y = "Mean Tau Index", title = " Distribution Mean Tau Index by Chromosome") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Tourner les étiquettes de l'axe x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 print(plot)
 
 mean_by_chromosome_hybrid<-merge(mean_by_chromosome_hybrid, size, by = "chr", all = T)
@@ -260,7 +260,7 @@ mean_by_chromosome_hybrid$chr <- factor(mean_by_chromosome_hybrid$chr, levels = 
 plot <- ggplot(mean_by_chromosome_pied, aes(x = chr, y = Tau)) +
   geom_point() +
   labs(x = "Chromosome", y = "Mean Tau Index", title = "Mean Tau Index by Chromosome") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Tourner les étiquettes de l'axe x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 print(plot)
 
 #######################################################################################################################################################
@@ -332,7 +332,7 @@ pied<-subset(tau_results_pied_gene, Tau >= 0.85 & Tau <= 1)
 
 boxplot(tau_results,
         main = "Tissue specificity (tau) distribution for each species",
-        names = c("albicollis", "hypoleuca"),  # Noms des boîtes
+        names = c("albicollis", "hypoleuca"),  
         ylab = "tau",
         col = c("skyblue", "red"))
 
@@ -548,3 +548,187 @@ ggplot(tau_results_hybrid_chr, aes(x = Max_Tissue, y = Tau, fill = category)) +
   scale_fill_manual(name = "Category", values = c("Macro" = "blue", "Intermediate" = "green", "Micro" = "red"), labels = category_order) +
   theme() 
 
+# tau ~ chr cat
+
+mean_by_chromosome_coll$category <- factor(mean_by_chromosome_coll$category,
+                                      levels = c("Macro", "Intermediate", "Micro"))
+ggplot(mean_by_chromosome_coll, aes(x = category, y = Tau, fill = category)) +
+  geom_boxplot() +
+  labs(x = "Category", y = "Tau",
+       title = "Tau values for each category (F.albicollis)") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5)) 
+
+mean_by_chromosome_pied$category <- factor(mean_by_chromosome_pies$category,
+                                           levels = c("Macro", "Intermediate", "Micro"))
+ggplot(mean_by_chromosome_pied, aes(x = category, y = Tau, fill = category)) +
+  geom_boxplot() +
+  labs(x = "Category", y = "Tau",
+       title = "Tau values for each category (F.hypoleuca)") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5)) 
+
+mean_by_chromosome_hybrid$category <- factor(mean_by_chromosome_hybrid$category,
+                                           levels = c("Macro", "Intermediate", "Micro"))
+ggplot(mean_by_chromosome_hybrid, aes(x = category, y = Tau, fill = category)) +
+  geom_boxplot() +
+  labs(x = "Category", y = "Tau",
+       title = "Tau values for each category (Hybrid)") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5)) 
+
+##############################################################################################
+
+# TPM
+
+TPM_coll_chr<- aggregate(cbind(TPM_Brain_coll_mean, TPM_Heart_coll_mean, TPM_Testis_coll_mean, TPM_Kidney_coll_mean, TPM_Liver_coll_mean) ~ chr, table_albicollis, mean)
+TPM_coll_cat<- aggregate(cbind(TPM_Brain_coll_mean, TPM_Heart_coll_mean, TPM_Testis_coll_mean, TPM_Kidney_coll_mean, TPM_Liver_coll_mean) ~ category, table_albicollis, mean)
+
+size<-read.table("chr_category.txt", header = T)
+size<-size %>% rename( chr = chromosome)
+table_hypoleuca<-merge(table_hypoleuca, size, by = "chr", all =T)
+
+TPM_pied_chr<- aggregate(cbind(TPM_Brain_pied_mean, TPM_Heart_pied_mean, TPM_Testis_pied_mean, TPM_Kidney_pied_mean, TPM_Liver_pied_mean) ~ chr, table_hypoleuca, mean)
+TPM_pied_cat<- aggregate(cbind(TPM_Brain_pied_mean, TPM_Heart_pied_mean, TPM_Testis_pied_mean, TPM_Kidney_pied_mean, TPM_Liver_pied_mean) ~ category, table_hypoleuca, mean)
+
+TPM_hybrid_chr<- aggregate(cbind(TPM_Brain_hybrid_mean, TPM_Heart_hybrid_mean, TPM_Testis_hybrid_mean, TPM_Kidney_hybrid_mean, TPM_Liver_hybrid_mean) ~ chr, table_hybrid, mean)
+TPM_hybrid_cat<- aggregate(cbind(TPM_Brain_hybrid_mean, TPM_Heart_hybrid_mean, TPM_Testis_hybrid_mean, TPM_Kidney_hybrid_mean, TPM_Liver_hybrid_mean) ~ category, table_hybrid, mean)
+
+
+## TPM category
+
+category_order <- c("Macro", "Intermediate", "Micro")
+palette_couleurs <- c("Brain" = "lightpink", 
+                      "Heart" = "tomato",
+                      "Testis" = "lightblue",
+                      "Kidney" = "lightgreen",
+                      "Liver" = "lightyellow")
+
+TPM_pied_cat$category <- factor(TPM_pied_cat$category,
+                                levels = c("Macro", "Intermediate", "Micro"))
+ggplot(TPM_pied_cat) +
+  geom_point(aes(x = category, y = TPM_Brain_pied_mean, color = "Brain"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Heart_pied_mean, color = "Heart"), shape = 15, size =3) +
+  geom_point(aes(x = category, y = TPM_Testis_pied_mean, color = "Testis"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Kidney_pied_mean, color = "Kidney"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Liver_pied_mean, color = "Liver"), shape = 15, size = 3) +
+  scale_color_manual(values = palette_couleurs) +
+  labs(x = "chromosome category", y = "Transcript Per Million", color = "") +
+  ggtitle("Gene expression in TPM for each chromosome category (F.hypoleuca)")
+
+TPM_coll_cat$category <- factor(TPM_coll_cat$category,
+                                levels = c("Macro", "Intermediate", "Micro"))
+ggplot(TPM_coll_cat) +
+  geom_point(aes(x = category, y = TPM_Brain_coll_mean, color = "Brain"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Heart_coll_mean, color = "Heart"), shape = 15, size =3) +
+  geom_point(aes(x = category, y = TPM_Testis_coll_mean, color = "Testis"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Kidney_coll_mean, color = "Kidney"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Liver_coll_mean, color = "Liver"), shape = 15, size = 3) +
+  scale_color_manual(values = palette_couleurs) +
+  labs(x = "chromosome category", y = "Transcript Per Million", color = "") +
+  ggtitle("Gene expression in TPM for each chromosome category (F.albicollis)")
+
+TPM_hybrid_cat$category <- factor(TPM_hybrid_cat$category,
+                                levels = c("Macro", "Intermediate", "Micro"))
+ggplot(TPM_hybrid_cat) +
+  geom_point(aes(x = category, y = TPM_Brain_hybrid_mean, color = "Brain"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Heart_hybrid_mean, color = "Heart"), shape = 15, size =3) +
+  geom_point(aes(x = category, y = TPM_Testis_hybrid_mean, color = "Testis"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Kidney_hybrid_mean, color = "Kidney"), shape = 15, size = 3) +
+  geom_point(aes(x = category, y = TPM_Liver_hybrid_mean, color = "Liver"), shape = 15, size = 3) +
+  scale_color_manual(values = palette_couleurs) +
+  labs(x = "chromosome category", y = "Transcript Per Million", color = "") +
+  ggtitle("Gene expression in TPM for each chromosome category (F.albicollis)")
+
+## TPM chr mean
+
+TPM_coll_chr<-merge(TPM_coll_chr, size, by = "chr", all = T)
+TPM_coll_chr <- subset(TPM_coll_chr, chr != "ChrFal34")
+TPM_coll_chr <- subset(TPM_coll_chr, chr != "ChrFal36")
+TPM_coll_chr <- subset(TPM_coll_chr, chr != "ChrZ")
+TPM_coll_chr$TPM_mean_coll <- rowMeans(TPM_coll_chr[, 2:6])
+
+ggplot(TPM_coll_chr, aes(x = factor(chr, levels = reorder(chr, length)), 
+                         y = TPM_mean_coll, color = category)) +
+  geom_point() +
+  xlab("Chromosome ordered by size") +
+  ylab("Transcript Per Million") +
+  ggtitle("Gene expression in TPM each chromosome (F.albicollis)") +
+  scale_color_discrete(name = "Category") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+
+TPM_pied_chr<-merge(TPM_pied_chr, size, by = "chr", all = T)
+TPM_pied_chr <- subset(TPM_pied_chr, chr != "ChrFal34")
+TPM_pied_chr <- subset(TPM_pied_chr, chr != "ChrFal36")
+TPM_pied_chr <- subset(TPM_pied_chr, chr != "ChrZ")
+TPM_pied_chr$TPM_mean_pied <- rowMeans(TPM_pied_chr[, 2:6])
+
+ggplot(TPM_pied_chr, aes(x = factor(chr, levels = reorder(chr, length)), 
+                         y = TPM_mean_pied, color = category)) +
+  geom_point() +
+  xlab("Chromosome ordered by size") +
+  ylab("Transcript Per Million") +
+  ggtitle("Gene expression in TPM each chromosome (F.hypoleuca)") +
+  scale_color_discrete(name = "Category") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+
+TPM_hybrid_chr<-merge(TPM_hybrid_chr, size, by = "chr", all = T)
+TPM_hybrid_chr <- subset(TPM_hybrid_chr, chr != "ChrFal34")
+TPM_hybrid_chr <- subset(TPM_hybrid_chr, chr != "ChrFal36")
+TPM_hybrid_chr <- subset(TPM_hybrid_chr, chr != "ChrZ")
+TPM_hybrid_chr$TPM_mean_hybrid <- rowMeans(TPM_hybrid_chr[, 2:6])
+
+ggplot(TPM_hybrid_chr, aes(x = factor(chr, levels = reorder(chr, length)), 
+                         y = TPM_mean_hybrid, color = category)) +
+  geom_point() +
+  xlab("Chromosome ordered by size") +
+  ylab("Transcript Per Million") +
+  ggtitle("Gene expression in TPM each chromosome (Hybrid)") +
+  scale_color_discrete(name = "Category") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+
+## TPM chr tissue
+
+category_order <- c("Macro", "Intermediate", "Micro")
+palette_couleurs <- c("Brain" = "lightpink", 
+                      "Heart" = "tomato",
+                      "Testis" = "lightblue",
+                      "Kidney" = "lightgreen",
+                      "Liver" = "lightyellow")
+ggplot() +
+  geom_point(data = TPM_coll_chr, aes(x = factor(chr, levels = unique(TPM_coll_chr$chr[order(TPM_coll_chr$length)])), y = TPM_Brain_coll_mean, color = "Brain"), shape = 16, size = 2) + 
+  geom_point(data = TPM_coll_chr, aes(x = factor(chr, levels = unique(TPM_coll_chr$chr[order(TPM_coll_chr$length)])), y = TPM_Heart_coll_mean, color = "Heart"), shape = 16, size = 2) +
+  geom_point(data = TPM_coll_chr, aes(x = factor(chr, levels = unique(TPM_coll_chr$chr[order(TPM_coll_chr$length)])), y = TPM_Testis_coll_mean, color = "Testis"), shape = 16, size = 2) +
+  geom_point(data = TPM_coll_chr, aes(x = factor(chr, levels = unique(TPM_coll_chr$chr[order(TPM_coll_chr$length)])), y = TPM_Kidney_coll_mean, color = "Kidney"), shape = 16, size = 2) +
+  geom_point(data = TPM_coll_chr, aes(x = factor(chr, levels = unique(TPM_coll_chr$chr[order(TPM_coll_chr$length)])), y = TPM_Liver_coll_mean, color = "Liver"), shape = 16, size = 2) +
+  xlab("Chromosome ordered by length") +
+  ylab("Transcript per million") +
+  ggtitle("Gene expression in TPM for each chromosome (F.albicollis)") +
+  scale_color_manual(name= "Tissue", values = palette_couleurs) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+ggplot() +
+  geom_point(data = TPM_pied_chr, aes(x = factor(chr, levels = unique(TPM_pied_chr$chr[order(TPM_pied_chr$length)])), y = TPM_Brain_pied_mean, color = "Brain"), shape = 16, size = 2) + 
+  geom_point(data = TPM_pied_chr, aes(x = factor(chr, levels = unique(TPM_pied_chr$chr[order(TPM_pied_chr$length)])), y = TPM_Heart_pied_mean, color = "Heart"), shape = 16, size = 2) +
+  geom_point(data = TPM_pied_chr, aes(x = factor(chr, levels = unique(TPM_pied_chr$chr[order(TPM_pied_chr$length)])), y = TPM_Testis_pied_mean, color = "Testis"), shape = 16, size = 2) +
+  geom_point(data = TPM_pied_chr, aes(x = factor(chr, levels = unique(TPM_pied_chr$chr[order(TPM_pied_chr$length)])), y = TPM_Kidney_pied_mean, color = "Kidney"), shape = 16, size = 2) +
+  geom_point(data = TPM_pied_chr, aes(x = factor(chr, levels = unique(TPM_pied_chr$chr[order(TPM_pied_chr$length)])), y = TPM_Liver_pied_mean, color = "Liver"), shape = 16, size = 2) +
+  xlab("Chromosome ordered by length") +
+  ylab("Transcript per million") +
+  ggtitle("Gene expression in TPM for each chromosome (F.hypoleuca)") +
+  scale_color_manual(name= "Tissue", values = palette_couleurs) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  
+ggplot() +
+  geom_point(data = TPM_hybrid_chr, aes(x = factor(chr, levels = unique(TPM_hybrid_chr$chr[order(TPM_hybrid_chr$length)])), y = TPM_Brain_hybrid_mean, color = "Brain"), shape = 16, size = 2) + 
+  geom_point(data = TPM_hybrid_chr, aes(x = factor(chr, levels = unique(TPM_hybrid_chr$chr[order(TPM_hybrid_chr$length)])), y = TPM_Heart_hybrid_mean, color = "Heart"), shape = 16, size = 2) +
+  geom_point(data = TPM_hybrid_chr, aes(x = factor(chr, levels = unique(TPM_hybrid_chr$chr[order(TPM_hybrid_chr$length)])), y = TPM_Testis_hybrid_mean, color = "Testis"), shape = 16, size = 2) +
+  geom_point(data = TPM_hybrid_chr, aes(x = factor(chr, levels = unique(TPM_hybrid_chr$chr[order(TPM_hybrid_chr$length)])), y = TPM_Kidney_hybrid_mean, color = "Kidney"), shape = 16, size = 2) +
+  geom_point(data = TPM_hybrid_chr, aes(x = factor(chr, levels = unique(TPM_hybrid_chr$chr[order(TPM_hybrid_chr$length)])), y = TPM_Liver_hybrid_mean, color = "Liver"), shape = 16, size = 2) +
+  xlab("Chromosome ordered by length") +
+  ylab("Transcript per million") +
+  ggtitle("Gene expression in TPM for each chromosome (Hybrid)") +
+  scale_color_manual(name= "Tissue", values = palette_couleurs) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+cor.test(TPM_coll_chr$TPM_mean_coll, TPM_pied_chr$TPM_mean_pied)

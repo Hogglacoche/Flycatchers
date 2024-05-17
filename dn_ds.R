@@ -80,6 +80,11 @@ merged_dn_ds <- merged_dn_ds %>%
 table_albicollis <- table_albicollis %>%
   rename_with(~ gsub("\\.y$", "_taiga", .x), ends_with(".y"))
 
+
+################################################################################################
+
+## plot
+
 merged_dn_ds <- merged_dn_ds[mixedorder(merged_dn_ds$chr), ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr22", ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr23", ]
@@ -89,11 +94,6 @@ merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr26", ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr27", ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "ChrLGE22", ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr28", ]
-
-
-################################################################################################
-
-## plot
 
 merged_dn_ds$chr <- factor(merged_dn_ds$chr, levels = mixedsort(merged_dn_ds$chr))
 
@@ -327,9 +327,17 @@ ggplot(dn_ds_cat) +
 ######################################################################################################""
 
 # dn/ds groupe new category Macro Micro
+setwd("/home/amaniouloux/Documents/data/dataframe/")
 
 table_albicollis <- read.table("table_albicollis.txt", header = T) 
+#table_albicollis <- table_albicollis[table_albicollis$dn_ds_gene_gc_S <= 1, ]
+#table_albicollis <- table_albicollis[table_albicollis$dn_ds_gene_all_S <= 1, ]
+#table_albicollis <- table_albicollis[table_albicollis$dn_ds_gene_gc_L <= 1, ]
+#table_albicollis <- table_albicollis[table_albicollis$dn_ds_gene_all_L <= 1, ]
+
 table_taiga <- read.table("table_taiga.txt", header = T)
+#table_taiga <- table_taiga[table_taiga$dn_ds_gene_gc_S <= 1, ]
+#table_taiga <- table_taiga[table_taiga$dn_ds_gene_all_S <= 1, ]
 
 calculer_dn_ds <- function(dn_tot, dn_norm_tot, ds_tot, ds_norm_tot) {
   return((dn_tot / dn_norm_tot) / (ds_tot / ds_norm_tot))
@@ -340,9 +348,9 @@ table_albicollis_macro<-na.omit(table_albicollis_macro)
 
 table_albicollis_micro <- subset(table_albicollis, new_category == "Micro")
 table_albicollis_micro<-na.omit(table_albicollis_micro)
-table_albicollis_micro <- table_albicollis_micro[table_albicollis_micro$chr != "Chr22", ]
-table_albicollis_micro <- table_albicollis_micro[table_albicollis_micro$chr != "Chr25", ]
-table_albicollis_micro <- table_albicollis_micro[table_albicollis_micro$chr != "Chr28", ]
+#table_albicollis_micro <- table_albicollis_micro[table_albicollis_micro$chr != "Chr22", ]
+#table_albicollis_micro <- table_albicollis_micro[table_albicollis_micro$chr != "Chr25", ]
+#table_albicollis_micro <- table_albicollis_micro[table_albicollis_micro$chr != "Chr28", ]
 
 
 table_taiga_macro <- subset(table_taiga, new_category == "Macro")
@@ -350,9 +358,9 @@ table_taiga_macro<-na.omit(table_taiga_macro)
 
 table_taiga_micro <- subset(table_taiga, new_category == "Micro")
 table_taiga_micro<-na.omit(table_taiga_micro)
-table_taiga_micro <- table_taiga_micro[table_taiga_micro$chr != "Chr22", ]
-table_taiga_micro <- table_taiga_micro[table_taiga_micro$chr != "Chr25", ]
-table_taiga_micro <- table_taiga_micro[table_taiga_micro$chr != "Chr28", ]
+#table_taiga_micro <- table_taiga_micro[table_taiga_micro$chr != "Chr22", ]
+#table_taiga_micro <- table_taiga_micro[table_taiga_micro$chr != "Chr25", ]
+#table_taiga_micro <- table_taiga_micro[table_taiga_micro$chr != "Chr28", ]
 
 # coll_dn_ds_gc_L
 
@@ -436,29 +444,48 @@ size<-size %>% rename(chr = chromosome)
 
 dn_ds_cat$new_category <- factor(dn_ds_cat$new_category, levels = c("Macro", "Micro"))
 library(ggplot2)
-palette_couleurs <- c("coll dn/ds GC L" = "steelblue4", 
-                      "coll dn/ds GC S" = "steelblue1",
-                      "coll dn/ds ALL L" = "tomato3",
-                      "coll dn/ds ALL S" = "tomato",
-                      "taiga dn/ds GC S" = "steelblue1",
-                      "taiga dn/ds ALL S" = "tomato")
+palette_couleurs <- c("coll dn/ds GC L" = "steelblue", 
+                      "coll dn/ds GC S" = "tomato",
+                      "coll dn/ds ALL L" = "steelblue4",
+                      "coll dn/ds ALL S" = "tomato3",
+                      "taiga dn/ds GC S" = "tomato",
+                      "taiga dn/ds ALL S" = "tomato3")
 
+linetype_palette <- c("coll dn/ds GC L" = "solid",
+                      "coll dn/ds GC S" = "solid",
+                      "coll dn/ds ALL L" = "solid",
+                      "coll dn/ds ALL S" = "solid",
+                      "taiga dn/ds GC S" = "solid",
+                      "taiga dn/ds ALL S" = "solid")
+
+
+order_legend <- c("coll dn/ds ALL S", "taiga dn/ds ALL S", "coll dn/ds GC S", "taiga dn/ds GC S", "coll dn/ds ALL L", "coll dn/ds GC L")
 ggplot(dn_ds_cat) +
   geom_point(aes(x = new_category, y = coll_dn_ds_gc_L, color = "coll dn/ds GC L"), shape = 15, size = 3) +
   geom_point(aes(x = new_category, y = coll_dn_ds_gc_S, color = "coll dn/ds GC S"), shape = 15, size = 3) +
   geom_point(aes(x = new_category, y = coll_dn_ds_all_L, color = "coll dn/ds ALL L"), shape = 15, size = 3) +
   geom_point(aes(x = new_category, y = coll_dn_ds_all_S, color = "coll dn/ds ALL S"), shape = 15, size = 3) +
-  geom_point(aes(x = new_category, y = taiga_dn_ds_gc_S, color = "taiga dn/ds GC S"), shape = 16, size = 3) +
-  geom_point(aes(x = new_category, y = taiga_dn_ds_all_S, color = "taiga dn/ds ALL S"), shape = 16, size = 3) +
-  geom_line(aes(x = new_category, y = coll_dn_ds_gc_L, group = 1, color = "coll dn/ds GC L")) +
-  geom_line(aes(x = new_category, y = coll_dn_ds_gc_S, group = 1, color = "coll dn/ds GC S")) +
-  geom_line(aes(x = new_category, y = coll_dn_ds_all_L, group = 1, color = "coll dn/ds ALL L")) +
-  geom_line(aes(x = new_category, y = coll_dn_ds_all_S, group = 1, color = "coll dn/ds ALL S")) +
-  geom_line(aes(x = new_category, y = taiga_dn_ds_gc_S, group = 1, color = "taiga dn/ds GC S")) +
-  geom_line(aes(x = new_category, y = taiga_dn_ds_all_S, group = 1, color = "taiga dn/ds ALL S")) +
-  scale_color_manual(values = palette_couleurs) +
-  labs(x = "chromosome category", y = "dn/ds", color = "") +
-  ggtitle("")
+  geom_point(aes(x = new_category, y = taiga_dn_ds_gc_S, color = "taiga dn/ds GC S"), shape = 17, size = 3) +
+  geom_point(aes(x = new_category, y = taiga_dn_ds_all_S, color = "taiga dn/ds ALL S"), shape = 17, size = 3) +
+  geom_line(aes(x = new_category, y = coll_dn_ds_gc_L, group = 1, color = "coll dn/ds GC L", linetype = "coll dn/ds GC L"), size = 1) +
+  geom_line(aes(x = new_category, y = coll_dn_ds_gc_S, group = 1, color = "coll dn/ds GC S", linetype = "coll dn/ds GC S"), size = 1) +
+  geom_line(aes(x = new_category, y = coll_dn_ds_all_L, group = 1, color = "coll dn/ds ALL L", linetype = "coll dn/ds ALL L"), size = 1) +
+  geom_line(aes(x = new_category, y = coll_dn_ds_all_S, group = 1, color = "coll dn/ds ALL S", linetype = "coll dn/ds ALL S"), size = 1) +
+  geom_line(aes(x = new_category, y = taiga_dn_ds_gc_S, group = 1, color = "taiga dn/ds GC S", linetype = "taiga dn/ds GC S"), size = 1) +
+  geom_line(aes(x = new_category, y = taiga_dn_ds_all_S, group = 1, color = "taiga dn/ds ALL S", linetype = "taiga dn/ds ALL S"), size = 1) +
+  scale_color_manual(values = palette_couleurs, breaks = order_legend) +
+  scale_linetype_manual(values = linetype_palette, breaks = order_legend) +
+  labs(x = "chromosome category", y = "dn/ds", color = "", linetype = "") +
+  ggtitle("")+
+  theme(
+    legend.title = element_text(size = 15),          
+    legend.text = element_text(size = 14),          
+    axis.title.x = element_text(size = 16),          
+    axis.title.y = element_text(size = 16),        
+    axis.text.x = element_text(size = 16),           
+    axis.text.y = element_text(size = 12)            
+  )
+
 
 ##############################################
 
@@ -583,6 +610,10 @@ venn_plot <- ggVennDiagram(x, label_alpha = 0,set_color = "red")
 
 # common gene
 
+calculer_dn_ds <- function(dn_tot, dn_norm_tot, ds_tot, ds_norm_tot) {
+  return((dn_tot / dn_norm_tot) / (ds_tot / ds_norm_tot))
+}
+
 table_albicollis <- read.table("table_albicollis.txt", header = T) 
 table_albicollis <- select(table_albicollis, gene, chr,dn_tot_gc_L,dn_norm_tot_gc_L,ds_tot_gc_L,ds_norm_tot_gc_L,dn_tot_gc_S,dn_norm_tot_gc_S,ds_tot_gc_S,ds_norm_tot_gc_S,dn_tot_all_L, dn_norm_tot_all_L, ds_tot_all_L, ds_norm_tot_all_L,dn_tot_all_S, dn_norm_tot_all_S, ds_tot_all_S, ds_norm_tot_all_S)
 table_taiga <- read.table("table_taiga.txt", header = T) 
@@ -656,7 +687,6 @@ merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "ChrLGE22", ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr25", ]
 merged_dn_ds <- merged_dn_ds[merged_dn_ds$chr != "Chr28", ]
 
-
 matrix_chr <- merged_dn_ds[, c('chr', 'coll_dn_ds_gc_L', 'coll_dn_ds_all_L','coll_dn_ds_gc_S', 'coll_dn_ds_all_S','taiga_dn_ds_gc_S','taiga_dn_ds_all_S')]
 matrix_chr <- matrix_chr %>%
   rename(dn_ds_gc_L_coll = coll_dn_ds_gc_L,
@@ -666,12 +696,20 @@ matrix_chr <- matrix_chr %>%
          dn_ds_gc_S_taiga = taiga_dn_ds_gc_S,
          dn_ds_all_S_taiga = taiga_dn_ds_all_S)
 
-is.numeric(matrix_chr)
-matrix_chr<- sapply(matrix_chr, as.numeric)
+matrix_chr <- matrix_chr %>%
+  select(dn_ds_all_S_coll, dn_ds_all_S_taiga, dn_ds_gc_S_coll, dn_ds_gc_S_taiga, dn_ds_all_L_coll, dn_ds_gc_L_coll)
 
-correlation_matrix <- cor(matrix_chr[, -1], method = "spearman")
-corrplot(correlation_matrix, method="circle", type="upper", tl.col="black", tl.srt=45)
-correlation_matrix
+matrix_chr <- sapply(matrix_chr, as.numeric)
 
-###################""
+correlation_matrix <- cor(matrix_chr, method = "spearman")
+
+new_labels <- c("COLL ALL S", "TAIGA ALL S", "COLL GC S", "TAIGA GC S", "COLL ALL L", "COLL GC L")
+
+colnames(correlation_matrix) <- new_labels
+rownames(correlation_matrix) <- new_labels
+
+corrplot(correlation_matrix, method = "circle", type = "upper", 
+         tl.col = "black", tl.srt = 45)
+
+###################
 

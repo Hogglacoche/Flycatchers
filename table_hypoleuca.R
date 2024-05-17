@@ -68,5 +68,10 @@ table_hypoleuca<-table_hypoleuca %>% rename(TPM_Testis_pied_4 = pied.4)
 table_hypoleuca<-table_hypoleuca %>% rename(TPM_Testis_pied_5 = pied.5)
 table_hypoleuca$TPM_Testis_pied_mean <- rowMeans(table_hypoleuca[, c("TPM_Testis_pied_1", "TPM_Testis_pied_2", "TPM_Testis_pied_3", "TPM_Testis_pied_4", "TPM_Testis_pied_5")])
 
+setwd("/home/amaniouloux/Documents/data/dataframe")
+size<- read.table("chr_category.txt", header = T)
+size<-size %>% rename(chr = chromosome)
+table_hypoleuca<-merge(table_hypoleuca, size, by = "chr", all =T)
+
 write.table(table_hypoleuca, "table_hypoleuca.txt", sep = "\t", row.names = FALSE)
 getwd()

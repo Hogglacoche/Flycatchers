@@ -17,4 +17,10 @@ table_parva <- table_parva %>%
 table_parva$gene <- sapply(str_split(table_parva$gene, "_"), "[[", 1)
 
 
+setwd("/home/amaniouloux/Documents/data/dataframe")
+size<- read.table("chr_category.txt", header = T)
+size<-size %>% rename(chr = chromosome)
+table_parva<-merge(table_parva, size, by = "chr", all =T)
+
 write.table(table_parva, file="table_parva.txt", sep= "\t", row.names = F)
+

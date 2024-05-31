@@ -678,6 +678,7 @@ TPM_pied_cat<- aggregate(cbind(TPM_Brain_pied_mean, TPM_Heart_pied_mean, TPM_Tes
 TPM_hybrid_chr<- aggregate(cbind(TPM_Brain_hybrid_mean, TPM_Heart_hybrid_mean, TPM_Testis_hybrid_mean, TPM_Kidney_hybrid_mean, TPM_Liver_hybrid_mean) ~ chr, table_hybrid, mean)
 TPM_hybrid_cat<- aggregate(cbind(TPM_Brain_hybrid_mean, TPM_Heart_hybrid_mean, TPM_Testis_hybrid_mean, TPM_Kidney_hybrid_mean, TPM_Liver_hybrid_mean) ~ category, table_hybrid, mean)
 
+TPM_coll_pied_cat <- merge(TPM_coll_cat, TPM_pied_cat, by = "new_category", all = T)
 
 ## TPM category
 
@@ -687,6 +688,10 @@ palette_couleurs <- c("Brain" = "lightpink",
                       "Testis" = "lightblue",
                       "Kidney" = "lightgreen",
                       "Liver" = "lightyellow")
+
+linetype_palette <- c("pied" = "dashed",
+											"coll" = "solid")
+											
 
 TPM_pied_cat$new_category <- factor(TPM_pied_cat$new_category,
                                 levels = c("Macro", "Micro"))
@@ -718,6 +723,7 @@ ggplot(TPM_coll_cat) +
   geom_line(aes(x = new_category, y = TPM_Kidney_coll_mean, group = 1, color = "Kidney")) + # Relier les points pour TPM_Kidney_coll_mean
   geom_point(aes(x = new_category, y = TPM_Liver_coll_mean, color = "Liver"), shape = 15, size = 3) +
   geom_line(aes(x = new_category, y = TPM_Liver_coll_mean, group = 1, color = "Liver")) + # Relier les points pour TPM_Liver_coll_mean
+	
   scale_color_manual(values = palette_couleurs) +
   labs(x = "chromosome category", y = "Transcript Per Million", color = "") +
   ggtitle("Gene expression in TPM for each chromosome category (F.albicollis)")
@@ -733,6 +739,44 @@ ggplot(TPM_hybrid_cat) +
   scale_color_manual(values = palette_couleurs) +
   labs(x = "chromosome category", y = "Transcript Per Million", color = "") +
   ggtitle("Gene expression in TPM for each chromosome category (F.albicollis)")
+
+TPM_coll_pied_cat$new_category <- factor(TPM_coll_pied_cat$new_category,
+																		levels = c("Macro", "Micro"))
+ggplot(TPM_coll_pied_cat) +
+	geom_point(aes(x = new_category, y = TPM_Brain_pied_mean, color = "Brain"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Brain_pied_mean, group = 1, color = "Brain", linetype = "pied"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Heart_pied_mean, color = "Heart"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Heart_pied_mean, group = 1, color = "Heart", linetype = "pied"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Testis_pied_mean, color = "Testis"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Testis_pied_mean, group = 1, color = "Testis", linetype = "pied"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Kidney_pied_mean, color = "Kidney"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Kidney_pied_mean, group = 1, color = "Kidney", linetype = "pied"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Liver_pied_mean, color = "Liver"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Liver_pied_mean, group = 1, color = "Liver", linetype = "pied"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Brain_coll_mean, color = "Brain"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Brain_coll_mean, group = 1, color = "Brain", linetype = "coll"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Heart_coll_mean, color = "Heart"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Heart_coll_mean, group = 1, color = "Heart", linetype = "coll"), size = 1) +
+	geom_point(aes(x = new_category, y = TPM_Testis_coll_mean, color = "Testis"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Testis_coll_mean, group = 1, color = "Testis", linetype = "coll"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Kidney_coll_mean, color = "Kidney"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Kidney_coll_mean, group = 1, color = "Kidney", linetype = "coll"), size = 1) + 
+	geom_point(aes(x = new_category, y = TPM_Liver_coll_mean, color = "Liver"), shape = 15, size = 3) +
+	geom_line(aes(x = new_category, y = TPM_Liver_coll_mean, group = 1, color = "Liver", linetype = "coll"), size = 1) + 
+	
+	scale_color_manual(values = palette_couleurs) +
+	scale_linetype_manual(values = linetype_palette) +
+	labs(x = "chromosome category", y = "Transcript Per Million", color = "",  linetype = "") +
+	ggtitle("")+
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12) )
+
+
 
 ## TPM chr mean
 
@@ -830,53 +874,7 @@ ggplot() +
 
 cor.test(TPM_coll_chr$TPM_mean_coll, TPM_pied_chr$TPM_mean_pied)
 
-#########""
-
-tau_results_coll_chr <- subset(tau_results_coll_chr, chr != "ChrZ")
-category_order <- c("Macro", "Micro")
-tau_results_coll_chr$Max_Tissue <- gsub("TPM_Kidney_coll_mean", "Kidney", tau_results_coll_chr$Max_Tissue)
-tau_results_coll_chr$Max_Tissue <- gsub("TPM_Liver_coll_mean", "Liver", tau_results_coll_chr$Max_Tissue)
-tau_results_coll_chr$Max_Tissue <- gsub("TPM_Heart_coll_mean", "Heart", tau_results_coll_chr$Max_Tissue)
-tau_results_coll_chr$Max_Tissue <- gsub("TPM_Brain_coll_mean", "Brain", tau_results_coll_chr$Max_Tissue)
-tau_results_coll_chr$Max_Tissue <- gsub("TPM_Testis_coll_mean", "Testis", tau_results_coll_chr$Max_Tissue)
-ggplot(tau_results_coll_chr, aes(x = Max_Tissue, y = Tau, fill = new_category)) +
-  geom_boxplot() +
-  xlab("Tissue") +  # Renommer l'étiquette de l'axe des abscisses
-  ylab("Tau") +
-  ggtitle("Tau for each tissue (F.albicollis)") +
-  scale_fill_manual(name = "Category", values = c("Macro" = "blue", "Micro" = "red"), labels = category_order) +
-  theme() 
-
-tau_results_pied_chr <- subset(tau_results_pied_chr, chr != "ChrZ")
-category_order <- c("Macro", "Micro")
-tau_results_pied_chr$Max_Tissue <- gsub("TPM_Kidney_pied_mean", "Kidney", tau_results_pied_chr$Max_Tissue)
-tau_results_pied_chr$Max_Tissue <- gsub("TPM_Liver_pied_mean", "Liver", tau_results_pied_chr$Max_Tissue)
-tau_results_pied_chr$Max_Tissue <- gsub("TPM_Heart_pied_mean", "Heart", tau_results_pied_chr$Max_Tissue)
-tau_results_pied_chr$Max_Tissue <- gsub("TPM_Brain_pied_mean", "Brain", tau_results_pied_chr$Max_Tissue)
-tau_results_pied_chr$Max_Tissue <- gsub("TPM_Testis_pied_mean", "Testis", tau_results_pied_chr$Max_Tissue)
-ggplot(tau_results_pied_chr, aes(x = Max_Tissue, y = Tau, fill = new_category)) +
-  geom_boxplot() +
-  xlab("Tissue") +  # Renommer l'étiquette de l'axe des abscisses
-  ylab("Tau") +
-  ggtitle("Tau for each tissue (F.hypoleuca)") +
-  scale_fill_manual(name = "Category", values = c("Macro" = "blue", "Micro" = "red"), labels = category_order) +
-  theme() 
-
-
-### specific expression
-
-tau_results_coll_chr<-subset(tau_results_coll_chr, Tau >= 0.85 & Tau <= 1)
-tau_results_pied_chr<-subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1)
-tau_results_heart_coll <- subset(tau_results_coll_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Heart")
-tau_results_brain_coll <- subset(tau_results_coll_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Brain")
-tau_results_testis_coll <- subset(tau_results_coll_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Testis")
-tau_results_liver_coll <- subset(tau_results_coll_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Liver")
-tau_results_kidney_coll <- subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Kidney")
-tau_results_heart_pied <- subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Heart")
-tau_results_brain_pied <- subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Brain")
-tau_results_testis_pied <- subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Testis")
-tau_results_liver_pied <- subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Liver")
-tau_results_kidney_pied <- subset(tau_results_pied_chr, Tau >= 0.85 & Tau <= 1 & Max_Tissue == "Kidney")
+#########
 
 anova_result_c <- aov(Tau ~ Max_Tissue * new_category, data = tau_results_coll_chr)
 summary(anova_result_c)
@@ -909,20 +907,254 @@ summary(anova_result_c)
 anova_result_p <- aov(Tau ~ Max_Tissue * new_category, data = tau_results_pied_chr)
 summary(anova_result_p)
 
-tau_results_heart_coll <- subset(tau_results_coll_chr, Tau < 0.85 & Max_Tissue == "TPM_Heart_coll_mean")
-tau_results_brain_coll <- subset(tau_results_coll_chr, Tau < 0.85 & Max_Tissue == "TPM_Brain_coll_mean")
-tau_results_testis_coll <- subset(tau_results_coll_chr, Tau < 0.85 & Max_Tissue == "Testis")
-tau_results_liver_coll <- subset(tau_results_coll_chr, Tau < 0.85 & Max_Tissue == "Liver")
-tau_results_kidney_coll <- subset(tau_results_pied_chr, Tau < 0.85 & Max_Tissue == "Kidney")
-tau_results_heart_pied <- subset(tau_results_pied_chr, Tau < 0.85 & Max_Tissue == "Heart")
-tau_results_brain_pied <- subset(tau_results_pied_chr, Tau < 0.85 & Max_Tissue == "Brain")
-tau_results_testis_pied <- subset(tau_results_pied_chr, Tau < 0.85 & Max_Tissue == "Testis")
-tau_results_liver_pied <- subset(tau_results_pied_chr, Tau < 0.85 & Max_Tissue == "Liver")
-tau_results_kidney_pied <- subset(tau_results_pied_chr, Tau < 0.85 & Max_Tissue == "Kidney")
 
 anova_result <- aov(Tau ~ new_category, data = tau_results_brain_coll)
 summary(anova_result)
 
-tau_results_brain_coll <- subset(tau_results_coll_chr, Max_Tissue == "TPM_Brain_coll_mean")
 
-boxplot(Tau ~ new_category, data = tau_results_brain_coll, xlab = "new_category", ylab = "Tau", main = "Boxplot de Tau par new_category")
+##################################################################################
+
+# BOXPLOT
+
+## TAU
+
+table_coll <- select(table_albicollis, gene, new_category)
+tau_results_coll_gene<-tau_results_coll_gene %>% rename(gene = Gene)
+tau_results_coll_gene <- select(tau_results_coll_gene, gene, Tau)
+table_coll<-merge(table_coll, tau_results_coll_gene, by = "gene", all = T)
+
+table_pied <- select(table_hypoleuca, gene)
+tau_results_pied_gene<-tau_results_pied_gene %>% rename(gene = Gene)
+tau_results_pied_gene <- select(tau_results_pied_gene, gene, Tau)
+table_pied<-merge(table_pied, tau_results_pied_gene, by = "gene", all = T)
+
+
+tau_results<-merge(table_coll, table_pied, by = "gene", all = T)
+tau_results<-na.omit(tau_results)
+
+ggplot(tau_results) +
+	geom_boxplot(aes(x = new_category, y = Tau.x, fill = new_category)) +
+	labs(title = "",
+			 x = "Category",
+			 y = "Tau",
+			 fill = "Category ") +
+	theme_minimal()+
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12)            
+	)
+
+
+
+ggplot(tau_results) +
+	geom_boxplot(aes(x = new_category, y = Tau.y, fill = new_category)) +
+	labs(title = "",
+			 x = "Category",
+			 y = "Tau",
+			 fill = "Category ") +
+	theme_minimal()+
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12)            
+	)
+
+anova_coll<-lm(Tau.x ~ new_category, data = tau_results)
+anova(anova_coll)
+
+anova_pied<-lm(Tau.y ~ new_category, data = tau_results)
+anova(anova_pied)
+
+tau_macro <- subset(tau_results, new_category == "Macro")
+tau_micro <- subset(tau_results, new_category == "Micro")
+
+t.test(tau_macro$Tau.x, tau_macro$Tau.y)
+t.test(tau_micro$Tau.x, tau_micro$Tau.y)
+
+
+## TPM TISSUE
+
+tpm_coll <- select(table_albicollis, gene, new_category, TPM_Brain_coll_mean, TPM_Heart_coll_mean, TPM_Liver_coll_mean, TPM_Kidney_coll_mean, TPM_Testis_coll_mean)
+tpm_coll<-na.omit(tpm_coll)
+tpm_coll <- tpm_coll %>%
+	mutate(across(starts_with("TPM"), log1p))
+
+
+tpm_coll_long <- tpm_coll %>%
+	pivot_longer(cols = starts_with("TPM"), 
+							 names_to = "Tissue", 
+							 values_to = "TPM") %>%
+	mutate(Tissue = recode(Tissue,
+												 "TPM_Brain_coll_mean" = "Brain",
+												 "TPM_Heart_coll_mean" = "Heart",
+												 "TPM_Liver_coll_mean" = "Liver",
+												 "TPM_Kidney_coll_mean" = "Kidney",
+												 "TPM_Testis_coll_mean" = "Testis"))
+
+color_palette <- c("Macro" = "tomato", "Micro" = "turquoise3")
+
+# Création du plot avec boxplots côte à côte
+ggplot(tpm_coll_long, aes(x = Tissue, y = TPM, fill = new_category)) +
+	geom_boxplot(position = position_dodge(width = 0.75)) +
+	scale_fill_manual(values = color_palette) +
+	labs(title = "",
+			 x = "Tissue",
+			 y = "Log1p(TPM)",
+			 fill = "Category") +
+	theme_minimal() +
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12)
+	)
+anova_coll_brain<-lm(TPM_Brain_coll_mean ~ new_category.x, data = tpm_merge)
+anova_coll_testis<-lm(TPM_Testis_coll_mean ~ new_category, data = tpm_coll)
+anova_coll_liver<-lm(TPM_Liver_coll_mean ~ new_category, data = tpm_coll)
+anova_coll_kidney<-lm(TPM_Kidney_coll_mean ~ new_category, data = tpm_coll)
+anova_coll_heart<-lm(TPM_Heart_coll_mean ~ new_category, data = tpm_coll)
+
+anova(anova_coll_brain)
+anova(anova_coll_testis)
+anova(anova_coll_liver)
+anova(anova_coll_kidney)
+anova(anova_coll_heart)
+
+tpm_macro <- tpm_coll[tpm_coll$new_category == "Macro", ]
+anova_coll<-lm(TPM_Heart_coll_mean ~ TPM_Kidney_coll_mean, data = tpm_macro)
+anova(anova_coll)
+
+
+tpm_pied <- select(table_hypoleuca, gene, new_category, TPM_Brain_pied_mean, TPM_Heart_pied_mean, TPM_Liver_pied_mean, TPM_Kidney_pied_mean, TPM_Testis_pied_mean)
+tpm_pied<-na.omit(tpm_pied)
+tpm_pied <- tpm_pied %>%
+	mutate(across(starts_with("TPM"), log1p))
+
+tpm_pied_long <- tpm_pied %>%
+	pivot_longer(cols = starts_with("TPM"), 
+							 names_to = "Tissue", 
+							 values_to = "TPM") %>%
+	mutate(Tissue = recode(Tissue,
+												 "TPM_Brain_pied_mean" = "Brain",
+												 "TPM_Heart_pied_mean" = "Heart",
+												 "TPM_Liver_pied_mean" = "Liver",
+												 "TPM_Kidney_pied_mean" = "Kidney",
+												 "TPM_Testis_pied_mean" = "Testis"))
+
+ggplot(tpm_pied_long) +
+	geom_boxplot(aes(x = new_category, y = TPM, fill = Tissue)) +
+	labs(title = "",
+			 x = "Category",
+			 y = "Log1p(TPM)",
+			 fill = "Tissue") +
+	theme_minimal() +
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12)
+	) 
+
+anova_pied_brain<-lm(TPM_Brain_pied_mean ~ new_category.x, data = tpm_merge)
+anova_pied_testis<-lm(TPM_Testis_pied_mean ~ new_category.x, data = tpm_merge)
+anova_pied_liver<-lm(TPM_Liver_pied_mean ~ new_category, data = tpm_pied)
+anova_pied_kidney<-lm(TPM_Kidney_pied_mean ~ new_category, data = tpm_pied)
+anova_pied_heart<-lm(TPM_Heart_pied_mean ~ new_category, data = tpm_pied)
+
+anova(anova_pied_brain)
+anova(anova_pied_testis)
+anova(anova_pied_liver)
+anova(anova_pied_kidney)
+anova(anova_pied_heart)
+
+
+mean_macro <- mean(tpm_coll$TPM_Brain_coll_mean[tpm_coll$new_category == "Macro"])
+mean_micro <- mean(tpm_coll$TPM_Brain_coll_mean[tpm_coll$new_category == "Micro"])
+
+tpm_merge<-merge(tpm_coll, tpm_pied, by = "gene", all = T)
+tpm_merge<-na.omit(tpm_merge)
+
+
+
+# TPM mean
+
+tpm_coll <- select(table_albicollis, gene, new_category, TPM_Brain_coll_mean, TPM_Heart_coll_mean, TPM_Liver_coll_mean, TPM_Kidney_coll_mean, TPM_Testis_coll_mean)
+tpm_coll<-na.omit(tpm_coll)
+
+tpm_coll <- tpm_coll %>%
+	rowwise() %>%
+	mutate(TPM_mean = mean(c_across(starts_with("TPM")))) %>%
+	ungroup()
+
+tpm_coll <- tpm_coll %>%
+	mutate(across(starts_with("TPM"), log1p))
+
+
+ggplot(tpm_coll) +
+	geom_boxplot(aes(x = new_category, y = TPM_mean, fill= new_category)) +
+	labs(title = "",
+			 x = "Category",
+			 y = "Log1p(TPM)",
+			 fill = "Category") +
+	theme_minimal() +
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12)
+	) 
+
+anova_tpm<-lm(TPM_mean ~ new_category, data = tpm_coll)
+anova(anova_tpm)
+
+mean_macro <- mean(tpm_coll$TPM_mean[tpm_coll$new_category == "Macro"])
+mean_micro <- mean(tpm_coll$TPM_mean[tpm_coll$new_category == "Micro"])
+
+
+tpm_pied <- select(table_hypoleuca, gene, new_category, TPM_Brain_pied_mean, TPM_Heart_pied_mean, TPM_Liver_pied_mean, TPM_Kidney_pied_mean, TPM_Testis_pied_mean)
+tpm_pied<-na.omit(tpm_pied)
+
+tpm_pied <- tpm_pied %>%
+	rowwise() %>%
+	mutate(TPM_mean = mean(c_across(starts_with("TPM")))) %>%
+	ungroup()
+
+tpm_pied <- tpm_pied %>%
+	mutate(across(starts_with("TPM"), log1p))
+
+
+ggplot(tpm_pied) +
+	geom_boxplot(aes(x = new_category, y = TPM_mean, fill= new_category)) +
+	labs(title = "",
+			 x = "Category",
+			 y = "Log1p(TPM)",
+			 fill = "Category") +
+	theme_minimal() +
+	theme(
+		legend.title = element_text(size = 15),          
+		legend.text = element_text(size = 14),          
+		axis.title.x = element_text(size = 16),          
+		axis.title.y = element_text(size = 16),        
+		axis.text.x = element_text(size = 16),           
+		axis.text.y = element_text(size = 12)
+	) 
+
+anova_tpm<-lm(TPM_mean ~ new_category, data = tpm_pied)
+anova(anova_tpm)
+
+mean_macro <- mean(tpm_pied$TPM_mean[tpm_pied$new_category == "Macro"])
+mean_micro <- mean(tpm_pied$TPM_mean[tpm_pied$new_category == "Micro"])
+

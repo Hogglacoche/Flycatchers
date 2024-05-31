@@ -117,5 +117,8 @@ recomb_coll<-recomb_coll %>% rename(gene = gene_id)
 recomb_coll$gene <- sapply(str_split(recomb_coll$gene, "_"), "[[", 1)
 table_albicollis<-merge(table_albicollis, recomb_coll, by = "gene", all = T)
 
+table_albicollis<-merge(table_albicollis, density , by = "chr", all = T)
+
 write.table(table_albicollis, file = "table_albicollis.txt", sep = "\t", row.names = FALSE)
 getwd()
+
